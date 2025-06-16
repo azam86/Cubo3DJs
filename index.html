@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+
+var canvas = document.getElementById("canvas");
+var ctx    = canvas.getContext("2d");
+
+const WIDTH = 800;
+const HEIGHT = 600;
+canvas.width = WIDTH;
+canvas.height = HEIGHT;
+
+class Cube {
+    constructor() {
+        this.points = [[-0.5,-0.5,-0.5], [-0.5,0.5,-0.5], [0.5,0.5,-0.5], [0.5,-0.5,-0.5],
+        [-0.5,-0.5,0.5], 
+        
+        [-0.5,0.5,0.5], [0.5,0.5,0.5], [0.5,-0.5,0.5]];
+    }
+
+    render(rx, ry, rz, tm) {
+        let fp1 = multiply3(multiply3(multiply3(this.points[0], rx), ry), rz);
+        let fp2 = multiply3(multiply3(multiply3(this.points[1], rx), ry), rz);
+        let fp3 = multiply3(multiply3(multiply3(this.points[2], rx), ry), rz);
+        let fp4 = multiply3(multiply3(multiply3(this.points[3], rx), ry), rz);
+        let fp5 = multiply3(multiply3(multiply3(this.points[4], rx), ry), rz);
+        let fp6 = multiply3(multiply3(multiply3(this.points[5], rx), ry), rz);
+        let fp7 = multiply3(multiply3(multiply3(this.points[6], rx), ry), rz);
+        let fp8 = multiply3(multiply3(multiply3(this.points[7], rx), ry), rz);
+  
+        fp1.push(1);
+        fp2.push(1);
+        fp3.push(1);
+        fp4.push(1);
+        fp5.push(1);
+        fp6.push(1);
+        fp7.push(1);
+        fp8.push(1);
+
+        fp1 = multiply4(fp1, tm);
+        fp2 = multiply4(fp2, tm);
+        fp3 = multiply4(fp3, tm);
+        fp4 = multiply4(fp4, tm);
+        fp5 = multiply4(fp5, tm);
+        fp6 = multiply4(fp6, tm);
+        fp7 = multiply4(fp7, tm);
+        fp8 = multiply4(fp8, tm);
+
+        
+        fp1 = multiply3(fp1, rx);
+        fp2 = multiply3(fp2, rx);
+        fp3 = multiply3(fp3, rx);
+        fp4 = multiply3(fp4, rx);
+        fp5 = multiply3(fp5, rx);
+        fp6 = multiply3(fp6, rx);
+        fp7 = multiply3(fp7, rx);
+        fp8 = multiply3(fp8, rx);
+
+
+        renderLine(fp1,fp2);
+        renderLine(fp2,fp3);
+        renderLine(fp3,fp4);
+        renderLine(fp4,fp1);
+        renderLine(fp1,fp5);
+        renderLine(fp2,fp6);
+        renderLine(fp3,fp7);
+        renderLine(fp4,fp8);
+        renderLine(fp5,fp6);
+        renderLine(fp6,fp7);
+        renderLine(fp7,fp8);
+        renderLine(fp8,fp5);
+    }
+}
+
+let cube = new Cube();
+
+let timer1 = 0;
+/*
+function renderPoint(point) {
+    let x = point[0];
+    let y = point[1];
+    let z = point[2] + 3;
+    
+    if(z==0) z = 1;
+    let xx = ((x + Math.sin(timer1/5))/(z) * WIDTH/2 + WIDTH/2);
+    let yy = ((y + Math.sin(timer1/5))/(z) * WIDTH/2 + HEIGHT/2);
+
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    
+    ctx.arc(xx, yy, 3, 0, Math.PI*2);
+    ctx.fill();
+    
+}
+*/
+
+
+function renderLine(p1, p2) {
+    let x1 = p1[0];
+    let y1 = p1[1];
+    let z1 = p1[2];
+    
+    if(z1<=0) return;
+    let xx1 = (x1/(z1) * WIDTH/2 + WIDTH/2);
+    let yy1 = (y1/(z1) * WIDTH/2 + HEIGHT/2);
+
+    let x2 = p2[0];
+    let y2 = p2[1];
+    let z2 = p2[2];
+    
+    if(z2<=0) return;
+    let xx2 = (x2/(z2) * WIDTH/2 + WIDTH/2);
+    let yy2 = (y2/(z2) * WIDTH/2 + HEIGHT/2);
+    
+    ctx.strokeStyle = "white";
+    ctx.beginPath();
+    ctx.moveTo(xx1,yy1);
+    ctx.lineTo(xx2,yy2);
+    ctx.stroke();
+}
+
+let angle = 0;
+
+function multiply3(m1, m2) {
+    return ([m1[0] * m2[0][0] + m1[1] * m2[1][0] + m1[2] * m2[2][0],
+            m1[0] * m2[0][1] + m1[1] * m2[1][1] + m1[2] * m2[2][1],
+            m1[0] * m2[0][2] + m1[1] * m2[1][2] + m1[2] * m2[2][2]]);
+}
+
+function multiply4(m1, m2) {
+   
+    return ([m1[0] * m2[0][0] + m1[1] * m2[0][1] + m1[2] * m2[0][2] + m1[3] * m2[0][3],
+            m1[0] * m2[1][0] + m1[1] * m2[1][1] + m1[2] * m2[1][2] + m1[3] * m2[1][3],
+            m1[0] * m2[2][0] + m1[1] * m2[2][1] + m1[2] * m2[2][2] + m1[3] * m2[2][3],
+            m1[0] * m2[3][2] + m1[1] * m2[3][2] + m1[2] * m2[3][2] + m1[3] * m2[3][3] ]);
+}
+
+function sum(m1, m2) {
+    return ([m1[0] + m2[0][0] + m1[1] + m2[1][0] + m1[2] + m2[2][0],
+            m1[0] + m2[0][1] + m1[1] + m2[1][1] + m1[2] + m2[2][1],
+            m1[0] + m2[0][2] + m1[1] + m2[1][2] + m1[2] + m2[2][2]]);
+    
+}
+
+let ticks = 0;
+function gameLoop(delta) {
+    timer1++;
+    ctx.fillStyle = "black";
+    ctx.fillRect(0,0,WIDTH,HEIGHT);
+    ticks+=1;
+    angle+=.1;
+    const rx = [[1,0,0],
+                [0, Math.cos(angle), -Math.sin(angle)],
+                [0, Math.sin(angle),  Math.cos(angle)]];        
+    const ry = [[Math.cos(angle), 0, Math.sin(angle)],
+                [0, 1, 0],
+                [-Math.sin(angle), 0, Math.cos(angle)]];
+    const rz = [[ Math.cos(angle), -Math.sin(angle), 0],
+                [ Math.sin(angle), Math.cos(angle), 0 ],
+                 [0, 0, 1]];
+    const tm = [[1, 0, 0, Math.sin(ticks/4)],
+                [ 0, 1, 0, Math.cos(ticks/4)],
+                 [0, 0, 1, 2],
+                 [0, 0, 0, 1]];
+    
+                 const nd = [[1, 0, 0],
+                [ 0, 1, 0 ],
+                 [0, 0, 1]];
+
+                 const nd2 = [[1, 0, 0,0],
+                [ 0, 1, 0 ,0],
+                 [0, 0, 1,2],
+                [0,0,0,1]];
+    cube.render( nd, nd,  nd, nd2);
+}
+const FPS = 30;
+let previousTime;
+
+let timer = (curTime) => {
+    if(previousTime === undefined) {
+        previousTime = curTime;
+    }
+    let delta = (curTime - previousTime)/1000;
+    while(delta >= 1/FPS) {
+        gameLoop(delta);
+        
+        delta-=1/FPS;
+        previousTime = curTime;
+    }
+
+   
+    requestAnimationFrame(timer);
+};
+
+requestAnimationFrame(timer);
+
+
+gameLoop();
+</script>
+</body>
+</html>
